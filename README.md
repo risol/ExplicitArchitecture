@@ -1,68 +1,95 @@
-# Explicit Architecture
+# Explicit Architecture: Software Architecture for Understandable, Evolvable, Verifiable Systems
 
-**版本 / Version / バージョン：V1**
+**Version: V1**
 
-> **Make Structure Visible. Make Behavior Explicit. Keep Dependencies Clear. Preserve Shared Invariants. Keep Changes Local. Make Tests Composable.**
+**Languages / 语言 / 言語:** [简体中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-[简体中文](#简体中文) · [English](#english) · [日本語](#日本語)
+---
 
-## 简体中文
+### 1. Definition
 
-### 什么是显式架构？
+**Explicit Architecture is a software architecture design method centered on system understandability, traceable behavior, and controlled change.**
 
-**显式架构是一种让软件系统更容易理解、修改和验证的设计方法。**
+It calls for clear, discoverable expression of a system’s core capabilities, module responsibilities, critical control flows, dependencies, shared rules, and testing boundaries. This lets developers and AI understand the system within a limited context, make focused changes, and verify the results reliably through layered tests.
 
-它通过清晰表达系统能力、模块职责、关键控制流、依赖关系、共享规则和测试边界，帮助开发者和 AI 在有限上下文中完成可靠的局部修改。显式架构不限定技术栈、目录结构或分层模式；设计应由真实需求、运行约束和风险驱动。
+Explicit Architecture does not prescribe one folder layout, layering style, or technology stack. It uses a set of actionable design constraints to keep software clear in structure, sound in responsibility, and controlled in complexity while meeting real functional, operational, security, and reliability requirements and continuing to evolve.
 
-### 十项核心原则
+### 2. Core Principles
 
-1. **核心能力与共享内核边界清晰**：能力模块负责领域规则；共享内核只负责必须一致的执行机制与不变量。
-2. **结构与关键路径可见**：从项目结构和入口能找到模块职责、依赖方向和主要运行路径。
-3. **按职责、变化原因与测试边界组织**：将共同演进的规则、状态、实现和测试合理聚拢。
-4. **关键控制流可追踪**：明确决策、执行顺序、状态变化、副作用与失败处理。
-5. **依赖与装配显式**：保持依赖方向稳定，通过清晰契约协作，并在组合根装配模块。
-6. **复杂度由真实需求与风险驱动**：每项重要抽象和基础设施都应有明确的问题与价值。
-7. **兼顾局部变化与共享不变量**：让独立职责局部演进，让必须一致的规则有明确权威。
-8. **测试细粒度且可组合**：逐层验证局部规则、完整用例、模块协作和真实运行路径。
-9. **提供最小充分上下文**：为开发者和 AI 提供完成局部任务所需的相关信息。
-10. **分层反馈与持续验证**：让验证成本匹配变更风险，并持续检查架构约束。
+**1. Capability & Kernel Boundaries — Keep core capabilities and shared mechanisms distinct**
 
-### 设计时可以先问
+Organize the project around its core capabilities and concepts. When a system has a shared execution kernel or foundational runtime mechanisms, make the responsibilities of each capability and the shared mechanism explicit. Capability modules own their domain rules; the shared kernel owns execution mechanisms and common invariants that must hold across capabilities. Do not centralize code in the kernel solely for reuse, and do not reimplement global rules in the name of local autonomy.
 
-- 这项能力或规则由哪个模块负责？
-- 从工程结构和入口能否快速找到它？
-- 能否追踪它如何执行、改变状态并处理失败？
-- 新增的抽象解决了什么实际问题？
-- 能否独立验证，并逐层组合验证更完整的行为？
+**2. Structural Transparency — Make structure and critical paths visible**
 
-**设计目标：** 满足真实运行要求，同时降低理解成本、变化传播成本和验证成本。
+Project structure, module names, application entry points, and architecture documentation should clearly express the system’s composition, module responsibilities, dependency directions, and main runtime paths. The application entry point should show how modules are assembled, while external entry points should delegate work to modules with clear responsibilities. Critical architecture information should not depend on memory, extensive file searches, or invisible framework conventions.
 
-## English
+**3. Responsibility Cohesion — Organize around responsibility, reasons for change, and test boundaries**
 
-### What is Explicit Architecture?
+Keep related rules, state, implementations, and tests together when they share meaning, collaborate closely, or change for the same reason. Introduce a new module or abstraction when responsibilities, reasons for change, dependencies, or testing boundaries are genuinely different and the split lowers overall complexity. Let cohesion, collaboration cost, and change patterns determine module size; do not use line count, directory count, or code reuse rate as the sole measure.
 
-**Explicit Architecture is a software design method that makes systems easier to understand, change, and verify.**
+**4. Explicit Control Flow — Make critical control flow traceable**
 
-It makes capabilities, responsibilities, control flow, dependencies, shared rules, and testing boundaries discoverable. Developers and AI can then work within a focused context and verify changes reliably. It leaves room for different stacks and architectural styles; structure follows real requirements, operating constraints, and risks.
+Make critical decisions, call order, state transitions, side effects, error handling, retries, and recovery traceable in code or a clear execution contract. Events, callbacks, asynchronous jobs, and framework mechanisms are valid choices when their triggers, execution semantics, state effects, and failure handling are explicit. Critical business or system behavior must not depend on undiscoverable implicit control logic.
 
-The ten principles cover capability and kernel boundaries, structural transparency, responsibility cohesion, explicit control flow, explicit dependencies and assembly, necessary complexity, local change and shared invariants, composable testability, bounded context, and layered feedback with continuous verification.
+**5. Explicit Dependencies & Assembly — Make dependencies and assembly explicit**
 
-**Design goal:** Meet real operating requirements while lowering the cost of understanding, change propagation, and verification.
+Keep module dependencies visible and their direction stable, and have modules collaborate through clear interfaces or contracts. The application composition root connects modules and their infrastructure dependencies. Modules should not depend back on the application entry point or unnecessarily on other modules’ internals. Add interfaces and abstractions when there is a real need for replacement, isolation, independent evolution, or a stable contract. Avoid circular dependencies, implicit global dependencies, and unnecessary indirection.
 
-## 日本語
+**6. Necessary Complexity — Let real needs and risks drive complexity**
 
-### Explicit Architecture とは
+Abstractions, layers, patterns, and infrastructure should serve confirmed functional needs, operating constraints, and risks. Do not omit necessary persistence, state recovery, access control, budget management, version consistency, or failure handling for the sake of surface simplicity. Also avoid overdesign without a real basis. Be able to explain the problem each important structural choice solves, the value it provides, and the effect of removing it.
 
-**Explicit Architecture は、システムを理解し、変更し、検証しやすくするソフトウェア設計手法です。**
+**7. Local Change & Shared Invariants — Balance local change with shared invariants**
 
-機能、責務、制御フロー、依存関係、共有ルール、テスト境界を見つけやすく表現し、開発者や AI が限られたコンテキストで安全に変更できるようにします。技術スタックや構成を指定せず、実際の要件、運用条件、リスクに沿って設計します。
+Let independently changing responsibilities evolve within their owning modules. Give rules that must remain consistent across modules one clear authority. Shared rules should be unified because their meaning and invariants match, not because their code looks similar. Stable contracts let modules use shared rules without duplication or semantic drift, while keeping a shared module from becoming a god module that owns all business logic. Locality should reduce unnecessary change propagation while preserving required consistency.
 
-十の原則は、機能と共有カーネルの境界、構造の透明性、責務の凝集、制御フローの明示、依存関係と組み立て、必要な複雑さ、局所的な変更と共有不変条件、組み合わせ可能なテスト、必要十分なコンテキスト、段階的なフィードバックと継続検証を扱います。
+**8. Composable Testability — Make tests focused and composable**
 
-**設計目標：** 実際の運用要件を満たしながら、理解、変更の波及、検証にかかるコストを抑えること。
+Rules and capabilities should be independently verifiable and composable through clear interfaces. Unit tests verify local rules; use-case tests verify complete operations; protocol and integration tests verify module collaboration; end-to-end tests verify real runtime paths. Give every test layer a clear purpose and make failures easy to locate. For systems that depend on models, distinguish deterministic software behavior tests from model behavior evaluations, and design each strategy for its validation goal, stability, and cost.
 
-## 完整说明 / Full document / 詳細な説明
+**9. Bounded Context — Provide the smallest sufficient context**
 
-- [简体中文完整说明](Explicit%20Architecture.md#简体中文)
-- [Full English text](Explicit%20Architecture.md#english)
-- [日本語の全文](Explicit%20Architecture.md#日本語)
+Project structure, module documentation, public contracts, important constraints, and tests should help developers and AI quickly understand a local task and its necessary upstream and downstream context. This allows reliable work without requiring an understanding of the whole system. Use cohesive modules, focused dependencies, clear names, and progressive information loading to lower the cost of understanding. Context efficiency means the smallest sufficient information for the task, not the fewest files, the smallest modules, or a large collection of tiny packages.
+
+**10. Layered Feedback & Continuous Verification — Use layered feedback and continuous verification**
+
+Every kind of change should have a clear, appropriate, repeatable verification path. Protect key invariants with automated tests, type checks, static analysis, and architecture checks. Provide fast feedback first, then run more costly integration, real-model, and end-to-end tests according to change risk, impact, and release stage. Continuously remove obsolete contracts, duplicate rules, unused abstractions, and leaking boundaries so the system remains aligned with its principles as it evolves.
+
+### 3. Architecture Decision Criteria
+
+Every important architecture decision should have clear answers to these questions:
+
+- **Capability ownership:** Which module owns this capability or rule? Which rules must be shared and kept consistent?
+- **Structural visibility:** Can a developer find it quickly from the project structure and entry point?
+- **Behavioral traceability:** Can someone understand how it runs, changes state, and handles failure?
+- **Dependency rationale:** Why does it depend on another module? Is the dependency necessary and its direction stable?
+- **Complexity rationale:** What real problem does a new abstraction, layer, or infrastructure component solve?
+- **Change locality:** Which modules will a change affect? Which effects are necessary, and which can be avoided?
+- **Composable testing:** Can it be verified independently and then as part of a larger behavior?
+- **Sufficient context:** Can developers or AI complete the task with limited, relevant information?
+- **Effective feedback:** Is there a verification path suited to the change’s risk?
+
+If these questions do not have clear answers, the design needs further clarification.
+
+### 4. Overall Design Goal
+
+Explicit Architecture aims to lower the cost of understanding, change propagation, and verification as much as practical while meeting real operating requirements. Code volume, module count, and abstraction depth are design choices rather than measures of success.
+
+Its purpose is to:
+
+- Give necessary complexity a clear owner and a traceable expression.
+- Protect cross-module consistency through an explicit source of authority.
+- Let independent responsibilities evolve locally and be verified independently.
+- Make system structure, behavior, and constraints discoverable to people and AI.
+- Keep tests and feedback continuously checking that the architecture still holds.
+
+### 5. Core Declaration
+
+**Make Structure Visible. Make Behavior Explicit. Keep Dependencies Clear. Preserve Shared Invariants. Keep Changes Local. Make Tests Composable.**
+
+### 6. In One Sentence
+
+**Explicit Architecture is a software architecture method that uses clear capability boundaries, visible project structure, traceable control flow, stable dependencies, consistent shared invariants, and composable tests to enable reliable understanding, focused change, and continuous evolution within a limited context.**
+
+---
