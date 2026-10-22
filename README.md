@@ -1,5 +1,7 @@
 # Explicit Architecture
 
+**版本 / Version / バージョン：V1**
+
 > **Make Structure Visible. Make Behavior Explicit. Keep Dependencies Clear. Preserve Shared Invariants. Keep Changes Local. Make Tests Composable.**
 
 [简体中文](#简体中文) · [English](#english) · [日本語](#日本語)

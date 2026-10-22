@@ -1,5 +1,7 @@
 # Explicit Architecture
 
+**版本 / Version / バージョン：V1**
+
 **Languages / 语言 / 言語:** [简体中文](#简体中文) · [English](#english) · [日本語](#日本語)
 
 ---
