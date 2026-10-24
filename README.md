@@ -1,6 +1,6 @@
 # Explicit Architecture: Software Architecture for Understandable, Evolvable, Verifiable Systems
 
-**Version: V1**
+**Version: V1.1**
 
 **Languages / 语言 / 言語:** [简体中文](README.zh-CN.md) · [日本語](README.ja.md)
 
@@ -52,9 +52,9 @@ Rules and capabilities should be independently verifiable and composable through
 
 Project structure, module documentation, public contracts, important constraints, and tests should help developers and AI quickly understand a local task and its necessary upstream and downstream context. This allows reliable work without requiring an understanding of the whole system. Use cohesive modules, focused dependencies, clear names, and progressive information loading to lower the cost of understanding. Context efficiency means the smallest sufficient information for the task, not the fewest files, the smallest modules, or a large collection of tiny packages.
 
-**10. Layered Feedback & Continuous Verification — Use layered feedback and continuous verification**
+**10. Layered Feedback & Executable Constraints — Provide layered feedback and make constraints executable**
 
-Every kind of change should have a clear, appropriate, repeatable verification path. Protect key invariants with automated tests, type checks, static analysis, and architecture checks. Provide fast feedback first, then run more costly integration, real-model, and end-to-end tests according to change risk, impact, and release stage. Continuously remove obsolete contracts, duplicate rules, unused abstractions, and leaking boundaries so the system remains aligned with its principles as it evolves.
+Make key invariants executable wherever practical: express them in types and contracts when possible, validate runtime rules at authoritative boundaries, and verify architectural rules with automated tests, static analysis, and architecture checks. When a constraint is violated, reject the invalid operation at the responsible boundary or fail the relevant build or CI check with actionable feedback. Provide fast feedback first, then use more costly integration, real-model, and end-to-end checks according to change risk, impact, and release stage. Keep these checks and rules current as the system evolves.
 
 ### 3. Architecture Decision Criteria
 
