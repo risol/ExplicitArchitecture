@@ -1,6 +1,6 @@
 # Explicit Architecture: Software Architecture for Understandable, Evolvable, Verifiable Systems
 
-**Version: V1.1**
+**Version: V1.2**
 
 **Languages / 语言 / 言語:** [简体中文](README.zh-CN.md) · [日本語](README.ja.md)
 
@@ -18,11 +18,11 @@ Explicit Architecture does not prescribe one folder layout, layering style, or t
 
 **1. Capability & Kernel Boundaries — Keep core capabilities and shared mechanisms distinct**
 
-Organize the project around its core capabilities and concepts. When a system has a shared execution kernel or foundational runtime mechanisms, make the responsibilities of each capability and the shared mechanism explicit. Capability modules own their domain rules; the shared kernel owns execution mechanisms and common invariants that must hold across capabilities. Do not centralize code in the kernel solely for reuse, and do not reimplement global rules in the name of local autonomy.
+Organize the project around its core capabilities and concepts. When a system has a shared execution kernel or foundational runtime mechanisms, make the responsibilities of each capability and the shared mechanism explicit. Capability modules own their domain rules; the shared kernel owns execution mechanisms and common invariants that must hold across capabilities. Do not centralize code in the kernel solely for reuse, and do not reimplement global rules in the name of local autonomy. When correctness depends on coordination of call order, state, or recovery across multiple components, identify who owns the complete behavior and lifecycle, expose operations that express complete intent, and coordinate internal steps so callers do not maintain internal ordering and invariants. Ownership can be implemented by collaborating components with clear responsibilities; it does not require one object or module.
 
 **2. Structural Transparency — Make structure and critical paths visible**
 
-Project structure, module names, application entry points, and architecture documentation should clearly express the system’s composition, module responsibilities, dependency directions, and main runtime paths. The application entry point should show how modules are assembled, while external entry points should delegate work to modules with clear responsibilities. Critical architecture information should not depend on memory, extensive file searches, or invisible framework conventions.
+Project structure, module names, application entry points, and architecture documentation should clearly express the system’s composition, module responsibilities, dependency directions, and main runtime paths. The application composition root or corresponding assembly code should show how modules are assembled, while external entry points should delegate work to modules with clear responsibilities. Critical architecture information should not depend on memory, extensive file searches, or invisible framework conventions.
 
 **3. Responsibility Cohesion — Organize around responsibility, reasons for change, and test boundaries**
 
@@ -30,7 +30,7 @@ Keep related rules, state, implementations, and tests together when they share m
 
 **4. Explicit Control Flow — Make critical control flow traceable**
 
-Make critical decisions, call order, state transitions, side effects, error handling, retries, and recovery traceable in code or a clear execution contract. Events, callbacks, asynchronous jobs, and framework mechanisms are valid choices when their triggers, execution semantics, state effects, and failure handling are explicit. Critical business or system behavior must not depend on undiscoverable implicit control logic.
+Make critical decisions, call order, state transitions, side effects, error handling, retries, and recovery traceable in code or a clear execution contract. Events, callbacks, asynchronous jobs, and framework mechanisms are valid choices when their triggers, execution semantics, state effects, and failure handling are explicit. Critical business or system behavior must not depend on undiscoverable implicit control logic. Operation contracts should specify applicable preconditions, results, state changes, and failure and recovery semantics.
 
 **5. Explicit Dependencies & Assembly — Make dependencies and assembly explicit**
 
@@ -42,34 +42,30 @@ Abstractions, layers, patterns, and infrastructure should serve confirmed functi
 
 **7. Local Change & Shared Invariants — Balance local change with shared invariants**
 
-Let independently changing responsibilities evolve within their owning modules. Give rules that must remain consistent across modules one clear authority. Shared rules should be unified because their meaning and invariants match, not because their code looks similar. Stable contracts let modules use shared rules without duplication or semantic drift, while keeping a shared module from becoming a god module that owns all business logic. Locality should reduce unnecessary change propagation while preserving required consistency.
+Let independently changing responsibilities evolve within their owning modules. Give rules that must remain consistent across modules one clear authority. Shared rules should be unified because their meaning and invariants match, not because their code looks similar. Stable contracts let modules use shared rules without duplication or semantic drift, while keeping a shared module from becoming a god module that owns all business logic. Where processes, concurrency, or persistence are involved, enforce required consistency through authoritative state transitions, transactions, or other appropriate mechanisms, not in-process call order alone. Locality should reduce unnecessary change propagation while preserving required consistency.
 
 **8. Composable Testability — Make tests focused and composable**
 
-Rules and capabilities should be independently verifiable and composable through clear interfaces. Unit tests verify local rules; use-case tests verify complete operations; protocol and integration tests verify module collaboration; end-to-end tests verify real runtime paths. Give every test layer a clear purpose and make failures easy to locate. For systems that depend on models, distinguish deterministic software behavior tests from model behavior evaluations, and design each strategy for its validation goal, stability, and cost.
+Rules should be independently verifiable where practical, and capabilities should be tested in progressively larger compositions through clear contracts. Unit tests verify local rules; use-case tests verify complete operations; protocol and integration tests verify module collaboration; end-to-end tests verify real runtime paths. Give every test layer a clear purpose and make failures easy to locate. For systems that depend on models, distinguish deterministic software behavior tests from model behavior evaluations, and design each strategy for its validation goal, stability, and cost.
 
-**9. Bounded Context — Provide the smallest sufficient context**
+**9. Sufficient Context — Provide the smallest sufficient context**
 
 Project structure, module documentation, public contracts, important constraints, and tests should help developers and AI quickly understand a local task and its necessary upstream and downstream context. This allows reliable work without requiring an understanding of the whole system. Use cohesive modules, focused dependencies, clear names, and progressive information loading to lower the cost of understanding. Context efficiency means the smallest sufficient information for the task, not the fewest files, the smallest modules, or a large collection of tiny packages.
 
 **10. Layered Feedback & Executable Constraints — Provide layered feedback and make constraints executable**
 
-Make key invariants executable wherever practical: express them in types and contracts when possible, validate runtime rules at authoritative boundaries, and verify architectural rules with automated tests, static analysis, and architecture checks. When a constraint is violated, reject the invalid operation at the responsible boundary or fail the relevant build or CI check with actionable feedback. Provide fast feedback first, then use more costly integration, real-model, and end-to-end checks according to change risk, impact, and release stage. Keep these checks and rules current as the system evolves.
+Make key invariants executable wherever practical: express them in types and contracts when possible, validate runtime rules at authoritative boundaries, and verify architectural rules with automated tests, static analysis, and architecture checks. Test critical ordering and invariants as appropriate. When a constraint is violated, reject the invalid operation at the responsible boundary or fail the relevant build or CI check with actionable feedback. Provide fast feedback first, then use more costly integration, real-model, and end-to-end checks according to change risk, impact, and release stage. Keep these checks and rules current as the system evolves.
 
 ### 3. Architecture Decision Criteria
 
 Every important architecture decision should have clear answers to these questions:
 
-- **Capability ownership:** Which module owns this capability or rule? Which rules must be shared and kept consistent?
-- **Structural visibility:** Can a developer find it quickly from the project structure and entry point?
-- **Behavioral traceability:** Can someone understand how it runs, changes state, and handles failure?
-- **Dependency rationale:** Why does it depend on another module? Is the dependency necessary and its direction stable?
-- **Complexity rationale:** What real problem does a new abstraction, layer, or infrastructure component solve?
-- **Change locality:** Which modules will a change affect? Which effects are necessary, and which can be avoided?
-- **Composable testing:** Can it be verified independently and then as part of a larger behavior?
-- **Sufficient context:** Can developers or AI complete the task with limited, relevant information?
-- **Effective feedback:** Is there a verification path suited to the change’s risk?
-
+- **Capability and boundary:** Who owns the complete operation, its lifecycle, and shared rules? Must callers maintain internal steps or invariants? Does encapsulation reduce overall complexity?
+- **Structure and context:** Can someone find the relevant responsibilities from the project structure and entry points, and obtain the context needed for the task?
+- **Behavior and state:** Does the contract specify results, state changes, and failure recovery? Who ensures required consistency during concurrency, restart, or failure?
+- **Dependencies and complexity:** Are dependencies necessary and their directions stable? What real problem does a new abstraction or infrastructure component solve?
+- **Change and sharing:** Which modules will a change affect? Which effects can be avoided, and which shared invariants must remain consistent?
+- **Verification and feedback:** Can invalid operations be rejected at the appropriate boundary, and can critical behavior be verified through composable tests suited to the risk?
 If these questions do not have clear answers, the design needs further clarification.
 
 ### 4. Overall Design Goal
