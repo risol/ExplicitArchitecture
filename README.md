@@ -1,6 +1,6 @@
 # Explicit Architecture: Software Architecture for Understandable, Evolvable, Verifiable Systems
 
-**Version: V1.2**
+**Version: V1.3**
 
 **Languages / 语言 / 言語:** [简体中文](README.zh-CN.md) · [日本語](README.ja.md)
 
@@ -30,7 +30,7 @@ Keep related rules, state, implementations, and tests together when they share m
 
 **4. Explicit Control Flow — Make critical control flow traceable**
 
-Make critical decisions, call order, state transitions, side effects, error handling, retries, and recovery traceable in code or a clear execution contract. Events, callbacks, asynchronous jobs, and framework mechanisms are valid choices when their triggers, execution semantics, state effects, and failure handling are explicit. Critical business or system behavior must not depend on undiscoverable implicit control logic. Operation contracts should specify applicable preconditions, results, state changes, and failure and recovery semantics.
+Make critical decisions, call order, state transitions, side effects, error handling, retries, and recovery traceable in code or a clear execution contract. Events, callbacks, asynchronous jobs, and framework mechanisms are valid choices when their triggers, execution semantics, state effects, and failure handling are explicit. Critical business or system behavior must not depend on undiscoverable implicit control logic. Operation contracts should specify applicable preconditions, results, state changes, and failure and recovery semantics. When state changes are subject to business constraints, ordering dependencies, or concurrent contention, explicitly model state and lifecycle: identify the state owner, allowed transitions, triggers, preconditions, invariants, outcomes, and conflict and recovery semantics. Choose a form proportionate to the complexity; no particular object or state machine is required.
 
 **5. Explicit Dependencies & Assembly — Make dependencies and assembly explicit**
 
@@ -42,7 +42,7 @@ Abstractions, layers, patterns, and infrastructure should serve confirmed functi
 
 **7. Local Change & Shared Invariants — Balance local change with shared invariants**
 
-Let independently changing responsibilities evolve within their owning modules. Give rules that must remain consistent across modules one clear authority. Shared rules should be unified because their meaning and invariants match, not because their code looks similar. Stable contracts let modules use shared rules without duplication or semantic drift, while keeping a shared module from becoming a god module that owns all business logic. Where processes, concurrency, or persistence are involved, enforce required consistency through authoritative state transitions, transactions, or other appropriate mechanisms, not in-process call order alone. Locality should reduce unnecessary change propagation while preserving required consistency.
+Let independently changing responsibilities evolve within their owning modules. Give rules that must remain consistent across modules one clear authority. Shared rules should be unified because their meaning and invariants match, not because their code looks similar. Stable contracts let modules use shared rules without duplication or semantic drift, while keeping a shared module from becoming a god module that owns all business logic. Assign constrained state transitions and their rules to a clear authoritative boundary so callers do not assemble state changes themselves. Where processes, concurrency, or persistence are involved, enforce required consistency through appropriate persistence, authoritative state transitions, or other mechanisms, not in-process call order alone. Use transactions, conditional updates, or similar mechanisms where a transition must be atomic. For workflows involving external side effects or long-running work, specify intermediate states and applicable recording, acknowledgment, retry, or compensation semantics. Locality should reduce unnecessary change propagation while preserving required consistency.
 
 **8. Composable Testability — Make tests focused and composable**
 
@@ -54,7 +54,7 @@ Project structure, module documentation, public contracts, important constraints
 
 **10. Layered Feedback & Executable Constraints — Provide layered feedback and make constraints executable**
 
-Make key invariants executable wherever practical: express them in types and contracts when possible, validate runtime rules at authoritative boundaries, and verify architectural rules with automated tests, static analysis, and architecture checks. Test critical ordering and invariants as appropriate. When a constraint is violated, reject the invalid operation at the responsible boundary or fail the relevant build or CI check with actionable feedback. Provide fast feedback first, then use more costly integration, real-model, and end-to-end checks according to change risk, impact, and release stage. Keep these checks and rules current as the system evolves.
+Make key invariants executable wherever practical: express them in types and contracts when possible, validate runtime rules at authoritative boundaries, and verify architectural rules with automated tests, static analysis, and architecture checks. According to risk, test critical ordering, invariants, valid and invalid transitions, recovery paths, and contention. When a constraint is violated, reject the invalid operation at the responsible boundary or fail the relevant build or CI check with actionable feedback. Provide fast feedback first, then use more costly integration, real-model, and end-to-end checks according to change risk, impact, and release stage. Keep these checks and rules current as the system evolves.
 
 ### 3. Architecture Decision Criteria
 
@@ -62,7 +62,7 @@ Every important architecture decision should have clear answers to these questio
 
 - **Capability and boundary:** Who owns the complete operation, its lifecycle, and shared rules? Must callers maintain internal steps or invariants? Does encapsulation reduce overall complexity?
 - **Structure and context:** Can someone find the relevant responsibilities from the project structure and entry points, and obtain the context needed for the task?
-- **Behavior and state:** Does the contract specify results, state changes, and failure recovery? Who ensures required consistency during concurrency, restart, or failure?
+- **Behavior and state:** Does the contract specify allowed transitions, triggers, outcomes, and failure recovery? How are concurrent conflicts resolved, and who ensures required consistency?
 - **Dependencies and complexity:** Are dependencies necessary and their directions stable? What real problem does a new abstraction or infrastructure component solve?
 - **Change and sharing:** Which modules will a change affect? Which effects can be avoided, and which shared invariants must remain consistent?
 - **Verification and feedback:** Can invalid operations be rejected at the appropriate boundary, and can critical behavior be verified through composable tests suited to the risk?
